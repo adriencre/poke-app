@@ -1,0 +1,2 @@
+com.example.pokedex
+style Theme_PokedexApp

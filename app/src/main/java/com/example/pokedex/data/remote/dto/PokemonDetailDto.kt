@@ -13,7 +13,18 @@ data class PokemonDetailDto(
     @SerializedName("weight") val weight: Int,
     @SerializedName("types") val types: List<TypeSlotDto>,
     @SerializedName("stats") val stats: List<StatSlotDto>,
-    @SerializedName("sprites") val sprites: SpritesDto
+    @SerializedName("sprites") val sprites: SpritesDto,
+    @SerializedName("cries") val cries: CriesDto?,
+    @SerializedName("abilities") val abilities: List<AbilitySlotDto>?,
+    @SerializedName("moves") val moves: List<MoveSlotDto>?
+)
+
+/**
+ * DTO pour les cris du Pokémon.
+ */
+data class CriesDto(
+    @SerializedName("latest") val latest: String?,
+    @SerializedName("legacy") val legacy: String?
 )
 
 /**
@@ -67,5 +78,40 @@ data class OtherSpritesDto(
  * DTO pour l'artwork officiel (image HD).
  */
 data class OfficialArtworkDto(
-    @SerializedName("front_default") val frontDefault: String?
+    @SerializedName("front_default") val frontDefault: String?,
+    @SerializedName("front_shiny") val frontShiny: String?
+)
+
+/**
+ * DTO pour un talent (ability)
+ */
+data class AbilitySlotDto(
+    @SerializedName("ability") val ability: AbilityDto,
+    @SerializedName("is_hidden") val isHidden: Boolean,
+    @SerializedName("slot") val slot: Int
+)
+
+data class AbilityDto(
+    @SerializedName("name") val name: String
+)
+
+/**
+ * DTO pour une attaque (move)
+ */
+data class MoveSlotDto(
+    @SerializedName("move") val move: MoveDto,
+    @SerializedName("version_group_details") val versionGroupDetails: List<VersionGroupDetailDto>
+)
+
+data class MoveDto(
+    @SerializedName("name") val name: String
+)
+
+data class VersionGroupDetailDto(
+    @SerializedName("level_learned_at") val levelLearnedAt: Int,
+    @SerializedName("move_learn_method") val moveLearnMethod: MoveLearnMethodDto
+)
+
+data class MoveLearnMethodDto(
+    @SerializedName("name") val name: String
 )

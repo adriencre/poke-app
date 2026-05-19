@@ -129,7 +129,10 @@ fun PokedexNavigation() {
                 arguments = listOf(navArgument("pokemonId") { type = NavType.IntType })
             ) {
                 PokemonDetailScreen(
-                    onBackClick = { navController.popBackStack() }
+                    onBackClick = { navController.popBackStack() },
+                    onPokemonClick = { pokemonId ->
+                        navController.navigate(Routes.pokemonDetail(pokemonId))
+                    }
                 )
             }
 

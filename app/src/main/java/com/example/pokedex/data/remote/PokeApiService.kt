@@ -2,8 +2,11 @@ package com.example.pokedex.data.remote
 
 import com.example.pokedex.data.remote.dto.PokemonDetailDto
 import com.example.pokedex.data.remote.dto.PokemonListResponse
+import com.example.pokedex.data.remote.dto.PokemonSpeciesDto
+import com.example.pokedex.data.remote.dto.EvolutionChainResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Url
 import retrofit2.http.Query
 
 /**
@@ -33,4 +36,14 @@ interface PokeApiService {
     suspend fun getPokemonDetail(
         @Path("id") id: Int
     ): PokemonDetailDto
+
+    @GET("pokemon-species/{id}")
+    suspend fun getPokemonSpecies(
+        @Path("id") id: Int
+    ): PokemonSpeciesDto
+
+    @GET
+    suspend fun getEvolutionChain(
+        @Url url: String
+    ): EvolutionChainResponseDto
 }

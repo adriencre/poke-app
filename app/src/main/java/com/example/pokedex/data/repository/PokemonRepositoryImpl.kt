@@ -5,6 +5,11 @@ import com.example.pokedex.data.remote.dto.PokemonDetailDto
 import com.example.pokedex.domain.model.Pokemon
 import com.example.pokedex.domain.model.PokemonDetail
 import com.example.pokedex.domain.model.PokemonStat
+import com.example.pokedex.domain.model.Evolution
+import com.example.pokedex.domain.model.PokemonAbility
+import com.example.pokedex.domain.model.PokemonMove
+import com.example.pokedex.domain.model.PokemonFlavorText
+import com.example.pokedex.domain.util.MoveDatabase
 import com.example.pokedex.domain.repository.PokemonRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -53,8 +58,46 @@ class PokemonRepositoryImpl @Inject constructor(
     override suspend fun getPokemonDetail(id: Int): PokemonDetail =
         withContext(Dispatchers.IO) {
             val dto = apiService.getPokemonDetail(id)
-            dto.toPokemonDetail()
+            val detail = dto.toPokemonDetail()
+            
+            try {
+                val species = apiService.getPokemonSpecies(id)
+                val evolutionUrl = species.evolutionChain.url
+                val evolutionResponse = apiService.getEvolutionChain(evolutionUrl)
+                val evolutions = extractEvolutions(evolutionResponse.chain)
+                
+                // Extraire les descriptions en français (fr)
+                val flavorTexts = species.flavorTextEntries
+                    ?.filter { it.language.name == "fr" }
+                    ?.map { PokemonFlavorText(text = it.flavorText.replace("\n", " ").replace("\u000c", " "), version = it.version.name) }
+                    ?: emptyList()
+
+                detail.copy(evolutions = evolutions, flavorTexts = flavorTexts)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                detail
+            }
         }
+
+    private fun extractEvolutions(node: com.example.pokedex.data.remote.dto.EvolutionNodeDto): List<Evolution> {
+        val evolutions = mutableListOf<Evolution>()
+        var currentNode: com.example.pokedex.data.remote.dto.EvolutionNodeDto? = node
+        
+        while (currentNode != null) {
+            val idStr = currentNode.species.url.trimEnd('/').substringAfterLast('/')
+            val id = idStr.toIntOrNull() ?: 1
+            evolutions.add(
+                Evolution(
+                    id = id,
+                    name = currentNode.species.name,
+                    imageUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png"
+                )
+            )
+            // On simplifie en prenant la première branche d'évolution (par ex. Évoli a plusieurs branches, on prend la 1ère)
+            currentNode = currentNode.evolvesTo.firstOrNull()
+        }
+        return evolutions
+    }
 
     // ---- Mappers DTO → Domain ----
 
@@ -78,6 +121,9 @@ class PokemonRepositoryImpl @Inject constructor(
         imageUrl = sprites.other?.officialArtwork?.frontDefault
             ?: sprites.frontDefault
             ?: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/$id.png",
+        shinyImageUrl = sprites.other?.officialArtwork?.frontShiny
+            ?: sprites.frontDefault
+            ?: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/shiny/$id.png",
         types = types.sortedBy { it.slot }.map { it.type.name },
         height = height,
         weight = weight,
@@ -86,6 +132,22 @@ class PokemonRepositoryImpl @Inject constructor(
                 name = statSlot.stat.name,
                 baseStat = statSlot.baseStat
             )
-        }
+        },
+        cryUrl = cries?.latest ?: cries?.legacy,
+        abilities = abilities?.map { PokemonAbility(name = it.ability.name, isHidden = it.isHidden) } ?: emptyList(),
+        moves = moves?.filter { moveSlot ->
+            moveSlot.versionGroupDetails.any { it.moveLearnMethod.name == "level-up" }
+        }?.map { moveSlot ->
+            val levelDetail = moveSlot.versionGroupDetails.firstOrNull { it.moveLearnMethod.name == "level-up" }
+            val level = levelDetail?.levelLearnedAt ?: 1
+            val moveInfo = MoveDatabase.getMoveInfo(moveSlot.move.name)
+            PokemonMove(
+                name = moveSlot.move.name,
+                levelLearnedAt = level,
+                type = moveInfo.type,
+                power = moveInfo.power,
+                accuracy = moveInfo.accuracy
+            )
+        }?.sortedBy { it.levelLearnedAt } ?: emptyList()
     )
 }

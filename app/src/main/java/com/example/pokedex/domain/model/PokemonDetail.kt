@@ -1,5 +1,7 @@
 package com.example.pokedex.domain.model
 
+import com.example.pokedex.domain.util.TypeEffectivenessCalculator
+
 /**
  * Modèle métier représentant les détails complets d'un Pokémon.
  * Utilisé sur l'écran de détail avec image HD, stats, taille et poids.
@@ -11,8 +13,16 @@ data class PokemonDetail(
     val types: List<String>,
     val height: Int,     // en décimètres (API)
     val weight: Int,     // en hectogrammes (API)
-    val stats: List<PokemonStat>
+    val stats: List<PokemonStat>,
+    val cryUrl: String?, // URL du cri (son)
+    val evolutions: List<Evolution> = emptyList(), // Chaîne d'évolution
+    val shinyImageUrl: String? = null,
+    val abilities: List<PokemonAbility> = emptyList(),
+    val moves: List<PokemonMove> = emptyList(),
+    val flavorTexts: List<PokemonFlavorText> = emptyList()
 ) {
+    val weaknessesAndResistances: Map<String, Float>
+        get() = TypeEffectivenessCalculator.getWeaknessesAndResistances(types)
     val formattedNumber: String
         get() = "#${id.toString().padStart(3, '0')}"
 
@@ -54,4 +64,37 @@ data class PokemonStat(
             "speed" -> "VIT"
             else -> name.uppercase()
         }
+}
+
+data class Evolution(
+    val id: Int,
+    val name: String,
+    val imageUrl: String
+)
+
+data class PokemonAbility(
+    val name: String,
+    val isHidden: Boolean
+) {
+    val displayName: String
+        get() = name.replace("-", " ").replaceFirstChar { it.uppercase() }
+}
+
+data class PokemonMove(
+    val name: String,
+    val levelLearnedAt: Int,
+    val type: String,
+    val power: Int?,
+    val accuracy: Int?
+) {
+    val displayName: String
+        get() = name.replace("-", " ").replaceFirstChar { it.uppercase() }
+}
+
+data class PokemonFlavorText(
+    val text: String,
+    val version: String
+) {
+    val displayVersion: String
+        get() = version.replace("-", " ").replaceFirstChar { it.uppercase() }
 }

@@ -5,6 +5,8 @@
 ![Architecture](https://img.shields.io/badge/Architecture-MVVM%20%2B%20Clean-orange.svg)
 ![API](https://img.shields.io/badge/API-PokéAPI-red.svg)
 
+*Un projet réalisé par **Adrien Crepel** et **Lilian Becquin**.*
+
 Une application Android native moderne, élégante et complète, développée en Kotlin avec Jetpack Compose. Elle sert de Pokédex interactif en exploitant les données de la célèbre [PokéAPI](https://pokeapi.co/).
 
 ## ✨ Fonctionnalités Principales
@@ -51,14 +53,6 @@ Le projet suit la **Clean Architecture** pour garantir la séparation des respon
     *   Laissez Gradle synchroniser les dépendances.
     *   Branchez un appareil physique ou lancez un émulateur.
     *   Cliquez sur le bouton **Run** (▶️) ou utilisez le terminal : `./gradlew installDebug`.
-
-## 📸 Aperçu
-
-*(Astuce : Remplacez les liens ci-dessous par de vraies captures d'écran de votre application une fois publiées)*
-
-| Liste des Pokémon | Détails & Évolutions | Favoris Sauvegardés |
-| :---: | :---: | :---: |
-| ![Liste](https://via.placeholder.com/250x500.png?text=Ecran+Liste) | ![Détail](https://via.placeholder.com/250x500.png?text=Ecran+Detail) | ![Favoris](https://via.placeholder.com/250x500.png?text=Ecran+Favoris) |
 
 ## 🤝 Contribuer
 
